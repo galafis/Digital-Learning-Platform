@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Learning Platform</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; background: #f5f5f5; }
+        h1 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 0.5rem 0; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Digital Learning Platform</h1>
+    <p>API endpoints:</p>
+    <ul>
+        <li><a href="/api/courses">GET /api/courses</a> — List all courses</li>
+        <li>GET /api/courses/&lt;id&gt; — Get course by ID</li>
+        <li>POST /api/enroll — Enroll a student</li>
+        <li>GET /api/progress?student_id=&amp;course_id= — Get progress</li>
+        <li>POST /api/progress — Update progress</li>
+        <li>GET /api/quizzes/&lt;id&gt; — Get quiz</li>
+        <li>POST /api/quizzes/&lt;id&gt;/submit — Submit quiz answers</li>
+        <li>GET /api/dashboard/&lt;student_id&gt; — Student dashboard</li>
+        <li><a href="/api/categories">GET /api/categories</a> — List categories</li>
+    </ul>
+</body>
+</html>

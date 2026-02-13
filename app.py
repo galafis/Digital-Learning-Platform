@@ -9,9 +9,10 @@ from flask import Flask, render_template, request, jsonify, session
 from datetime import datetime, timedelta
 import json
 import uuid
+import os
 
 app = Flask(__name__)
-app.secret_key = 'digital_learning_secret_2024'
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 # In-memory storage for demo
 courses = []
@@ -19,6 +20,10 @@ students = []
 enrollments = []
 progress = []
 quizzes = []
+
+# Module-level ID counters to avoid collision
+_next_enrollment_id = 1
+_next_progress_id = 1
 
 def initialize_sample_data():
     global courses, students, enrollments, progress, quizzes
@@ -134,8 +139,6 @@ def initialize_sample_data():
         }
     ])
 
-initialize_sample_data()
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -171,6 +174,7 @@ def get_course(course_id):
 
 @app.route('/api/enroll', methods=['POST'])
 def enroll_student():
+    global _next_enrollment_id
     data = request.get_json()
     student_id = data.get('student_id')
     course_id = data.get('course_id')
@@ -181,13 +185,14 @@ def enroll_student():
         return jsonify({'message': 'Already enrolled'}), 400
     
     new_enrollment = {
-        'id': len(enrollments) + 1,
+        'id': _next_enrollment_id,
         'student_id': student_id,
         'course_id': course_id,
         'enrolled_date': datetime.now().isoformat(),
         'progress_percentage': 0,
         'completed': False
     }
+    _next_enrollment_id += 1
     enrollments.append(new_enrollment)
     return jsonify(new_enrollment), 201
 
@@ -204,10 +209,11 @@ def get_progress():
 
 @app.route('/api/progress', methods=['POST'])
 def update_progress():
+    global _next_progress_id
     data = request.get_json()
     
     new_progress = {
-        'id': len(progress) + 1,
+        'id': _next_progress_id,
         'student_id': data.get('student_id'),
         'course_id': data.get('course_id'),
         'module_id': data.get('module_id'),
@@ -215,6 +221,7 @@ def update_progress():
         'completion_date': datetime.now().isoformat() if data.get('completed') else None,
         'time_spent': data.get('time_spent', 0)
     }
+    _next_progress_id += 1
     progress.append(new_progress)
     
     # Update enrollment progress
@@ -243,9 +250,8 @@ def get_quiz(quiz_id):
     return jsonify({'error': 'Quiz not found'}), 404
 
 @app.route('/api/quizzes/<int:quiz_id>/submit', methods=['POST'])
-def submit_quiz():
+def submit_quiz(quiz_id):
     data = request.get_json()
-    quiz_id = data.get('quiz_id')
     answers = data.get('answers')
     student_id = data.get('student_id')
     
@@ -330,5 +336,6 @@ def get_categories():
     return jsonify(category_stats)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    initialize_sample_data()
+    app.run(debug=False, host='0.0.0.0', port=5000)
 
